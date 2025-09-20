@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AES Encrypt/Decrypt</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    background: linear-gradient(to bottom right, #fffaf0, #f0faff);
+    font-family: 'Inter', sans-serif;
+  }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    max-width: 800px;
+    width: 100%;
+  }
+  button, .copy-btn, .back-btn {
+    transition: all 0.3s ease;
+  }
+  button:hover, .copy-btn:hover, .back-btn:hover {
+    transform: translateY(-2px);
+  }
+</style>
+</head>
+<body class="flex flex-col items-center p-4 min-h-screen">
+  <div class="card">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4 text-center">AES Encrypt / Decrypt Demo</h1>
+
+    <textarea id="inputText" rows="4" class="w-full p-3 border rounded mb-4" placeholder="Enter text or ciphertext"></textarea>
+    <input type="text" id="key" class="w-full p-3 border rounded mb-4" placeholder="Enter any key">
+
+    <div class="flex flex-wrap gap-3 justify-center mb-4">
+      <button onclick="encryptText()" class="bg-green-600 text-white px-5 py-2 rounded shadow hover:bg-green-500">Encrypt</button>
+      <button onclick="decryptText()" class="bg-purple-600 text-white px-5 py-2 rounded shadow hover:bg-purple-500">Decrypt</button>
+      <button onclick="clearText()" class="bg-gray-400 text-black px-5 py-2 rounded shadow hover:bg-gray-300">Clear</button>
+      <button class="copy-btn bg-yellow-400 text-black px-5 py-2 rounded shadow hover:bg-yellow-300" onclick="copyResult()">Copy Result</button>
+      <a href="index.html" class="back-btn bg-blue-500 text-white px-5 py-2 rounded shadow hover:bg-blue-400">Back to Home</a>
+    </div>
+
+    <textarea id="resultText" rows="4" class="w-full p-3 border rounded mb-2" readonly placeholder="Result will appear here"></textarea>
+    <p id="status" class="text-gray-600 text-center"></p>
+  </div>
+
+<script>
+const statusEl = document.getElementById("status");
+const resultEl = document.getElementById("resultText");
+
+function str2ab(str) { return new TextEncoder().encode(str); }
+function ab2b64(buf) { return btoa(String.fromCharCode(...new Uint8Array(buf))); }
+function b642ab(b64) { return new Uint8Array(atob(b64).split("").map(c=>c.charCodeAt(0))); }
+
+async function getKey(password) {
+  const enc = str2ab(password);
+  const hash = await crypto.subtle.digest("SHA-256", enc);
+  return crypto.subtle.importKey("raw", hash, "AES-GCM", true, ["encrypt","decrypt"]);
+}
+
+async function encryptText() {
+  const text = document.getElementById("inputText").value.trim();
+  const keyStr = document.getElementById("key").value.trim();
+  if(!text || !keyStr) { statusEl.textContent="Enter text and key"; return; }
+
+  const key = await getKey(keyStr);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const enc = await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, str2ab(text));
+  const combined = new Uint8Array(iv.length + enc.byteLength);
+  combined.set(iv,0); combined.set(new Uint8Array(enc), iv.length);
+  resultEl.value = ab2b64(combined);
+  statusEl.textContent = "Encryption successful";
+}
+
+async function decryptText() {
+  const b64 = document.getElementById("inputText").value.trim();
+  const keyStr = document.getElementById("key").value.trim();
+  if(!b64 || !keyStr) { statusEl.textContent="Enter ciphertext and key"; return; }
+
+  try {
+    const combined = b642ab(b64);
+    const iv = combined.slice(0,12);
+    const data = combined.slice(12);
+    const key = await getKey(keyStr);
+    const decrypted = await crypto.subtle.decrypt({name:"AES-GCM", iv}, key, data);
+    resultEl.value = new TextDecoder().decode(decrypted);
+    statusEl.textContent = "Decryption successful";
+  } catch(e) {
+    statusEl.textContent = "Decryption failed: wrong key or corrupted ciphertext";
+  }
+}
+
+function clearText() {
+  document.getElementById("inputText").value="";
+  document.getElementById("key").value="";
+  resultEl.value="";
+  statusEl.textContent="";
+}
+
+function copyResult() {
+  if(resultEl.value) {
+    resultEl.select();
+    document.execCommand("copy");
+    statusEl.textContent = "Result copied to clipboard!";
+  } else {
+    statusEl.textContent = "Nothing to copy!";
+  }
+}
+</script>
+</body>
+</html>

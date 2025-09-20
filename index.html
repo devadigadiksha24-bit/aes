@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AES Encryption Intro</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    background: linear-gradient(to bottom right, #fef9f0, #f0faff);
+    font-family: 'Inter', sans-serif;
+  }
+  .card {
+   
+    border-radius: 12px;
+    padding: 2rem;
+   
+    max-width: 900px;
+    width: 100%;
+    text-align: center;
+  }
+  a.button {
+    display: inline-block;
+    margin-top: 1rem;
+    transition: all 0.3s ease;
+  }
+  a.button:hover {
+    transform: translateY(-2px);
+  }
+</style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+  <div class="card">
+    <h1 class="text-4xl font-bold text-gray-800 mb-4">AES Encryption Demo</h1>
+    <p class="text-gray-700 mb-6 text-lg">
+      Advanced Encryption Standard (AES) is a symmetric encryption algorithm widely used to secure data.  
+      With this demo, you can encrypt and decrypt text directly in your browser safely and instantly.
+    </p>
+
+    <!-- Added "Why AES?" Section -->
+    <div class="text-left mb-6">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-2">Why AES?</h2>
+      <ul class="list-disc list-inside text-gray-700 space-y-1">
+        <li>In 1990's the cracking of DES algorithm became possible.</li>
+        <li>Around 50 hours of brute-forcing allowed messages to be cracked.</li>
+        <li>NIST started searching for a new feasible algorithm and proposed its requirements in 1997.</li>
+        <li>In 2001, Rijndael algorithm designed by Rijmen and Daemen of Belgium was declared as the winner.</li>
+        <li>It met all security, cost, and implementation criteria.</li>
+      </ul>
+    </div>
+
+    <img src="https://content.nordlayer.com/uploads/medium_DES_encryption_vs_AES_encryption_1400x894_86b98328aa.webp" 
+         alt="AES Diagram" class="rounded shadow-md mb-6 max-w-full h-auto">
+
+    <p class="text-gray-600 mb-6">Click below to start encrypting and decrypting text:</p>
+    <a href="aes_demo.html" class="button bg-blue-600 text-white px-6 py-3 rounded shadow hover:bg-blue-500">Go to AES Demo</a>
+  </div>
+</body>
+</html>
